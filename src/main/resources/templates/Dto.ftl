@@ -11,6 +11,4 @@ public class ${tableName}DTO extends QkBaseDto{
         </#if>
         private ${field.fieldTypeName} ${field.fieldName};
     </#list>
-
-
 }

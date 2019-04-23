@@ -1,8 +1,9 @@
 package com.kobold.service.Impl;
 
 import com.kobold.codegenerates.FreeMarkerTemplateUtils;
-import com.kobold.configs.DbBaseApplicationContext;
 import com.kobold.configs.DefaultDbApplicationContext;
+import com.kobold.configs.IDbFactory;
+import com.kobold.consts.DBConset;
 import com.kobold.models.FieldInfo;
 import com.kobold.models.MethodInfo;
 import com.kobold.models.ModelInfo;
@@ -22,166 +23,173 @@ import java.util.StringTokenizer;
 
 public class DbServiceImpl {
 
-	public void handleTable() {
-		Connection connection = null;
-		ResultSet set = null;
-		try {
-			DbBaseApplicationContext context=new DefaultDbApplicationContext();
-			DatabaseMetaData metaData = connection.getMetaData();
-			ResultSet tableRs = metaData.getTables(context.getDbName(), null, "%", new String[]{"TABLE"});
-			List<ModelInfo> modelInfos = new ArrayList<>();
-			while (tableRs.next()) {
-				String tableName = tableRs.getString("TABLE_NAME");
-				String remark = tableRs.getString("REMARKS");
-				ModelInfo modelInfo = new ModelInfo();
-				modelInfo.setClassName(convertToJavaName(tableName, true));
-				modelInfo.setComment(remark);
-				modelInfo.setTableName(tableName);
-				List<FieldInfo> fieldInfos = handleTableField(metaData.getColumns(null, null, tableName, "%"));
-				modelInfo.setFieldInfoList(fieldInfos);
-				modelInfo.setMethodInfoList(handleMethod(modelInfo));
-				modelInfos.add(modelInfo);
+    public void handleTable() {
+        Connection connection = null;
+        ResultSet set = null;
+        try {
+            IDbFactory context = new DefaultDbApplicationContext();
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet tableRs = metaData.getTables(context.getDbName(), null, "%", new String[]{"TABLE"});
+            List<ModelInfo> modelInfos = new ArrayList<>();
+            List<ModelInfo> modelInfos = new ArrayList<>();
+            while (tableRs.next()) {
+                String tableName = tableRs.getString(DBConset.TABLE_NAME);
+                String remark = tableRs.getString("REMARKS");
+                ModelInfo modelInfo = new ModelInfo();
+                modelInfo.setClassName(convertToJavaName(tableName, true));
+                modelInfo.setComment(remark);
+                modelInfo.setTableName(tableName);
+                List<FieldInfo> fieldInfos = handleTableField(metaData.getColumns(context.getDbName(), null, tableName, "%"));
+                modelInfo.setFieldInfoList(fieldInfos);
+                modelInfo.setMethodInfoList(handleMethod(modelInfo));
+                modelInfos.add(modelInfo);
+            }
+            outputFiles(modelInfos);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }finally {
+            try {
+                set.close();
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
-			}
-			outputFiles(modelInfos);
-		} catch (Exception ex) {
+    }
 
-		}
+    public List<MethodInfo> handleMethod(ModelInfo modelInfo) {
 
-	}
+        List<MethodInfo> methodInfos = new ArrayList<>();
+        for (FieldInfo fieldInfo : modelInfo.getFieldInfoList()) {
+            MethodInfo methodInfo = handleGetMethod(fieldInfo);
+            methodInfos.add(methodInfo);
+            methodInfo = handleSetMethod(fieldInfo);
+            methodInfos.add(methodInfo);
+        }
+        return methodInfos;
 
-	public List<MethodInfo> handleMethod(ModelInfo modelInfo) {
-
-		List<MethodInfo> methodInfos = new ArrayList<>();
-		for (FieldInfo fieldInfo : modelInfo.getFieldInfoList()) {
-			MethodInfo methodInfo = handleGetMethod(fieldInfo);
-			methodInfos.add(methodInfo);
-			methodInfo = handleSetMethod(fieldInfo);
-			methodInfos.add(methodInfo);
-		}
-		return methodInfos;
-
-	}
+    }
 
 
-	public MethodInfo handleGetMethod(FieldInfo fieldInfo) {
-		MethodInfo methodInfo = new MethodInfo();
-		methodInfo.setStatic(false);
-		methodInfo.setMethodTypeName(fieldInfo.getFieldTypeName());
-		methodInfo.setAccessibility(MethodConst.PUBLIC);
-		methodInfo.setMethodName(MethodConst.SET + convertToJavaName(fieldInfo.getFieldName(), true));
-		return methodInfo;
-	}
+    public MethodInfo handleGetMethod(FieldInfo fieldInfo) {
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setStatic(false);
+        methodInfo.setMethodTypeName(fieldInfo.getFieldTypeName());
+        methodInfo.setAccessibility(MethodConst.PUBLIC);
+        methodInfo.setMethodName(MethodConst.SET + convertToJavaName(fieldInfo.getFieldName(), true));
+        return methodInfo;
+    }
 
-	public MethodInfo handleSetMethod(FieldInfo fieldInfo) {
-		MethodInfo methodInfo = new MethodInfo();
-		methodInfo.setStatic(false);
-		methodInfo.setMethodTypeName(MethodConst.VOID);
-		methodInfo.setAccessibility(MethodConst.PUBLIC);
-		methodInfo.setStatic(false);
-		methodInfo.setMethodName(MethodConst.GET + convertToJavaName(fieldInfo.getFieldName(), true));
-		return methodInfo;
-	}
+    public MethodInfo handleSetMethod(FieldInfo fieldInfo) {
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setStatic(false);
+        methodInfo.setMethodTypeName(MethodConst.VOID);
+        methodInfo.setAccessibility(MethodConst.PUBLIC);
+        methodInfo.setStatic(false);
+        methodInfo.setMethodName(MethodConst.GET + convertToJavaName(fieldInfo.getFieldName(), true));
+        return methodInfo;
+    }
 
-	public void outputFiles(List<ModelInfo> modelInfos) {
-		try {
-			File file = new File("D://QkBaseDto.java");
-			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-			String packageName = modelInfos.get(0).getPackageName();
-			FreeMarkerTemplateUtils.processTemplate("QkBaseDto.ftl", packageName, writer);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (TemplateException e) {
-			e.printStackTrace();
-		} finally {
+    public void outputFiles(List<ModelInfo> modelInfos) {
+        try {
+            File file = new File("D://QkBaseDto.java");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            String packageName = modelInfos.get(0).getPackageName();
+            FreeMarkerTemplateUtils.processTemplate("QkBaseDto.ftl", packageName, writer);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TemplateException e) {
+            e.printStackTrace();
+        } finally {
 
-		}
+        }
 
-		modelInfos.stream().forEach(modelInfo -> {
-			File file = new File("D://" + modelInfo.getClassName() + ".java");
-			try {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-				FreeMarkerTemplateUtils.processTemplate("Dto.ftl", modelInfo, writer);
-				writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (TemplateException e) {
-				e.printStackTrace();
-			}
-		});
-	}
+        modelInfos.stream().forEach(modelInfo -> {
+            File file = new File("D://" + modelInfo.getClassName() + ".java");
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+                FreeMarkerTemplateUtils.processTemplate("Dto.ftl", modelInfo, writer);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (TemplateException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-	private List<FieldInfo> handleTableField(ResultSet column) throws SQLException, ClassNotFoundException {
-		List<FieldInfo> fieldInfos = new ArrayList<>();
-		while (column.next()) {
-			FieldInfo info = new FieldInfo();
-			info.setDbFieldName(column.getString("COLUMN_NAME"));
-			JDBCType jdbcType = JDBCType.valueOf(column.getInt("DATA_TYPE"));
-			info.setDbType(jdbcType.toString());
-			info.setComment(column.getString("REMARKS"));
-			info.setFieldName(convertToFieldName(info.getDbFieldName()));
-			info.setFieldType(DataBaseUtils.getJavaClassTypeByDbType(jdbcType));
-			info.setFieldTypeName(info.getFieldType().getSimpleName());
-			fieldInfos.add(info);
-		}
-		return fieldInfos;
-	}
+    private List<FieldInfo> handleTableField(ResultSet column) throws SQLException, ClassNotFoundException {
+        List<FieldInfo> fieldInfos = new ArrayList<>();
+        while (column.next()) {
+            FieldInfo info = new FieldInfo();
+            info.setDbFieldName(column.getString("COLUMN_NAME"));
+            JDBCType jdbcType = JDBCType.valueOf(column.getInt("DATA_TYPE"));
+            info.setDbType(jdbcType.toString());
+            info.setComment(column.getString("REMARKS"));
+            info.setFieldName(convertToFieldName(info.getDbFieldName()));
+            info.setFieldType(DataBaseUtils.getJavaClassTypeByDbType(jdbcType));
+            info.setFieldTypeName(info.getFieldType().getSimpleName());
+            fieldInfos.add(info);
+        }
+        return fieldInfos;
+    }
 
-	/**
-	 * 将表名转换为实体名
-	 * 表名多个单词以下划线隔开
-	 * 实体名使用驼峰规则
-	 */
-	private String convertToJavaName(String tableName, boolean isUpper) {
-		String[] words = splitString(tableName.toLowerCase(), "_");
-		StringBuilder entityName = new StringBuilder();
-		for (int i = 0; i < words.length; i++) {
-			entityName.append(toUppercaseForFirstLetter(words[i], isUpper));
-		}
+    /**
+     * 将表名转换为实体名
+     * 表名多个单词以下划线隔开
+     * 实体名使用驼峰规则
+     */
+    private String convertToJavaName(String tableName, boolean isUpper) {
+        String[] words = splitString(tableName.toLowerCase(), "_");
+        StringBuilder entityName = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            entityName.append(toUppercaseForFirstLetter(words[i], isUpper));
+        }
 
-		return entityName.toString();
-	}
+        return entityName.toString();
+    }
 
-	/**
-	 * @param columnName
-	 * @return
-	 */
+    /**
+     * @param columnName
+     * @return
+     */
 
-	public static String convertToFieldName(String columnName) {
-		String[] words = splitString(columnName.toLowerCase(), "_");
-		StringBuilder entityName = new StringBuilder();
-		for (int i = 1; i < words.length; i++) {
-			entityName.append(toUppercaseForFirstLetter(words[i], true));
-		}
-		words[0] = toUppercaseForFirstLetter(words[0], false);
+    public static String convertToFieldName(String columnName) {
+        String[] words = splitString(columnName.toLowerCase(), "_");
+        StringBuilder entityName = new StringBuilder();
+        for (int i = 1; i < words.length; i++) {
+            entityName.append(toUppercaseForFirstLetter(words[i], true));
+        }
+        words[0] = toUppercaseForFirstLetter(words[0], false);
 
-		return entityName.toString();
-	}
+        return entityName.toString();
+    }
 
-	public static String toUppercaseForFirstLetter(String str, boolean isUpper) {
-		if (str.isEmpty())
-			return str;
-		char[] chars = str.toCharArray();
-		chars[0] = isUpper ? Character.toUpperCase(chars[0]) : Character.toLowerCase(chars[0]);
-		return new String(chars);
-	}
+    public static String toUppercaseForFirstLetter(String str, boolean isUpper) {
+        if (str.isEmpty())
+            return str;
+        char[] chars = str.toCharArray();
+        chars[0] = isUpper ? Character.toUpperCase(chars[0]) : Character.toLowerCase(chars[0]);
+        return new String(chars);
+    }
 
-	/**
-	 * 使用StringTokenizer分割字符串，不包含界符
-	 */
-	public static String[] splitString(String str, String delim) {
-		if (StringUtils.isEmptyOrWhitespaceOnly(str))
-			return null;
+    /**
+     * 使用StringTokenizer分割字符串，不包含界符
+     */
+    public static String[] splitString(String str, String delim) {
+        if (StringUtils.isEmptyOrWhitespaceOnly(str))
+            return null;
 
-		StringTokenizer tokens = new StringTokenizer(str, delim);
+        StringTokenizer tokens = new StringTokenizer(str, delim);
 
-		String[] rs = new String[tokens.countTokens()];
+        String[] rs = new String[tokens.countTokens()];
 
-		int i = 0;
-		while (tokens.hasMoreTokens())
-			rs[i++] = tokens.nextToken();
+        int i = 0;
+        while (tokens.hasMoreTokens())
+            rs[i++] = tokens.nextToken();
 
-		return rs;
-	}
+        return rs;
+    }
 }
