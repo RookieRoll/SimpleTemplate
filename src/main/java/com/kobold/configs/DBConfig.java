@@ -1,59 +1,70 @@
 package com.kobold.configs;
 
+import com.kobold.qkutils.PropertiesUtil;
+
+import java.util.Optional;
+
 public class DBConfig {
-	private String Url;
-	private String UserName;
-	private String Password;
-	private String DriverName;
-	private String DataBaseName;
-	private String MaxPoolSize;
+    private String url;
+    private String userName;
+    private String password;
+    private String driverName;
+    private String dataBaseName;
+    private Optional<Integer> maxPoolSize;
+    private static final String propertiesFilePath = "properties/db.properties";
 
-	public DBConfig(){
-//		this.Url=url;
-//		this.UserName=userName;
-//		this.Password=password;
-//		DriverName = driverName;
-	}
+    public DBConfig() {}
+
+    public static DBConfig getInstance() {
+        return PropertiesUtil.loadProperty(propertiesFilePath,DBConfig.class);
+    }
 
 
+    public String getUrl() {
+        return url;
+    }
 
-	public String getUrl() {
-		return Url;
-	}
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-	public void setUrl(String url) {
-		Url = url;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	public String getUserName() {
-		return UserName;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public void setUserName(String userName) {
-		UserName = userName;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public String getPassword() {
-		return Password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setPassword(String password) {
-		Password = password;
-	}
+    public String getDataBaseName() {
+        return dataBaseName;
+    }
 
-	public String getDataBaseName() {
-		return DataBaseName;
-	}
+    public void setDataBaseName(String dataBaseName) {
+        this.dataBaseName = dataBaseName;
+    }
 
-	public void setDataBaseName(String dataBaseName) {
-		DataBaseName = dataBaseName;
-	}
+    public String getDriverName() {
+        return driverName;
+    }
 
-	public String getDriverName() {
-		return DriverName;
-	}
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
+    }
 
-	public void setDriverName(String driverName) {
-		DriverName = driverName;
-	}
+    public Optional<Integer> getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public void setMaxPoolSize(Optional<Integer> maxPoolSize) {
+        this.maxPoolSize = maxPoolSize;
+    }
 }

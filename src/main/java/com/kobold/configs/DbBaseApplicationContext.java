@@ -4,12 +4,12 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-abstract class DbBaseApplicationContext {
+public abstract class DbBaseApplicationContext {
 	protected DBConfig dbConfig;
 	protected DataSource dataSource;
 
-	public DbBaseApplicationContext(DBConfig dbConfig) {
-		dbConfig = dbConfig;
+	public DbBaseApplicationContext() {
+		dbConfig = DBConfig.getInstance();
 		try {
 			dataSource=getDataSource();
 			dbConfig.setDataBaseName(dataSource.getConnection().getCatalog());

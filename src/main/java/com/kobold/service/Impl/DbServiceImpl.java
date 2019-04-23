@@ -1,10 +1,12 @@
 package com.kobold.service.Impl;
 
 import com.kobold.codegenerates.FreeMarkerTemplateUtils;
+import com.kobold.configs.DbBaseApplicationContext;
+import com.kobold.configs.DefaultDbApplicationContext;
 import com.kobold.models.FieldInfo;
 import com.kobold.models.MethodInfo;
 import com.kobold.models.ModelInfo;
-import com.kobold.QKUtils.DataBaseUtils;
+import com.kobold.qkutils.DataBaseUtils;
 import com.kobold.consts.MethodConst;
 import com.mysql.cj.util.StringUtils;
 import freemarker.template.TemplateException;
@@ -24,10 +26,9 @@ public class DbServiceImpl {
 		Connection connection = null;
 		ResultSet set = null;
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/testdemo?serverTimezone=GMT%2B8&useSSL=false", "root", "qh18723361304");
+			DbBaseApplicationContext context=new DefaultDbApplicationContext();
 			DatabaseMetaData metaData = connection.getMetaData();
-			ResultSet tableRs = metaData.getTables("testdemo", null, "%", new String[]{"TABLE"});
+			ResultSet tableRs = metaData.getTables(context.getDbName(), null, "%", new String[]{"TABLE"});
 			List<ModelInfo> modelInfos = new ArrayList<>();
 			while (tableRs.next()) {
 				String tableName = tableRs.getString("TABLE_NAME");

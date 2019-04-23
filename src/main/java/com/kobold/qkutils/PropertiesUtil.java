@@ -1,15 +1,22 @@
-package com.kobold.QKUtils;
+package com.kobold.qkutils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public class PropertiesUtil {
 	public static <T> T loadProperty(String filePath, Class<?> clazz) {
-		Field[] fields = clazz.getFields();
+		List<Field> fields=new ArrayList<>();
+		Class<?> cla=clazz;
+		while (cla!=null&&cla!=Object.class){
+			fields.addAll(Arrays.asList(cla.getDeclaredFields()));
+			cla=cla.getSuperclass();
+		}
 		Properties properties = getProperties(filePath);
 		T t = null;
 		try {
@@ -17,7 +24,8 @@ public class PropertiesUtil {
 
 			for (Field field : fields) {
 				field.setAccessible(true);
-				field.set(t, properties.get(field.getName()));
+				if(properties.contains(field.getName().toLowerCase()))
+					field.set(t, properties.get(field.getName().toLowerCase()));
 			}
 		} catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
 			e.printStackTrace();
@@ -27,17 +35,16 @@ public class PropertiesUtil {
 
 	private static Properties getProperties(String filePath) {
 		Properties properties = new Properties();
-		InputStream input = null;
+		InputStream resource= ResourceUtil.getResource(filePath);
 		try {
-			input = new FileInputStream(filePath);//加载Java项目根路径下的配置文件
-			properties.load(input);// 加载属性文件
-
+			properties.load(resource);// 加载属性文件
 		} catch (IOException io) {
+			System.out.println(io.getMessage());
 
 		} finally {
-			if (input != null) {
+			if (resource != null) {
 				try {
-					input.close();
+					resource.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

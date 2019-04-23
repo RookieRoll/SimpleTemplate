@@ -1,4 +1,4 @@
-package com.kobold.QKUtils;
+package com.kobold.qkutils;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -6,8 +6,6 @@ import java.sql.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DataBaseUtils {
 	private static Map<JDBCType, Class<?>> javaTypes = new HashMap<JDBCType, Class<?>>();

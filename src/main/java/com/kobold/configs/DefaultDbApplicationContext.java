@@ -9,8 +9,8 @@ import java.sql.SQLException;
 public class DefaultDbApplicationContext extends DbBaseApplicationContext {
 
 
-	public DefaultDbApplicationContext(DBConfig dbConfig) {
-		super(dbConfig);
+	public DefaultDbApplicationContext() {
+		super();
 	}
 
 	public void setDataSource(DataSource dataSource){
@@ -29,6 +29,9 @@ public class DefaultDbApplicationContext extends DbBaseApplicationContext {
 		config.setUsername(dbConfig.getUserName());
 		config.setPassword(dbConfig.getPassword());
 		config.setDriverClassName(dbConfig.getDriverName());
+		if(dbConfig.getMaxPoolSize().isPresent())
+			config.setMaximumPoolSize(dbConfig.getMaxPoolSize().get());
+
 		HikariDataSource dataSource = new HikariDataSource(config);
 		return dataSource;
 	}
