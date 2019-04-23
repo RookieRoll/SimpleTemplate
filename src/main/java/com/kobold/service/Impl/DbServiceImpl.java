@@ -31,7 +31,6 @@ public class DbServiceImpl {
             DatabaseMetaData metaData = connection.getMetaData();
             ResultSet tableRs = metaData.getTables(context.getDbName(), null, "%", new String[]{"TABLE"});
             List<ModelInfo> modelInfos = new ArrayList<>();
-            List<ModelInfo> modelInfos = new ArrayList<>();
             while (tableRs.next()) {
                 String tableName = tableRs.getString(DBConset.TABLE_NAME);
                 String remark = tableRs.getString("REMARKS");
