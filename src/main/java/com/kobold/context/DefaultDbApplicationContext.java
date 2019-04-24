@@ -1,4 +1,4 @@
-package com.kobold.configs;
+package com.kobold.context;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -31,6 +31,8 @@ public class DefaultDbApplicationContext extends DbBaseApplicationContext {
 		config.setDriverClassName(dbConfig.getDriverName());
 		if(dbConfig.getMaxPoolSize().isPresent())
 			config.setMaximumPoolSize(dbConfig.getMaxPoolSize().get());
+		if(dbConfig.getConnectionTimeout().isPresent())
+			config.setConnectionTimeout(dbConfig.getConnectionTimeout().get());
 
 		HikariDataSource dataSource = new HikariDataSource(config);
 		return dataSource;

@@ -1,6 +1,6 @@
-package com.kobold.configs;
+package com.kobold.context;
 
-import com.kobold.service.IDbService;
+import com.kobold.configs.DBConfig;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

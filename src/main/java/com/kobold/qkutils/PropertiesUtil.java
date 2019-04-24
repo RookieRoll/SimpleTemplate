@@ -24,7 +24,7 @@ public class PropertiesUtil {
 
 			for (Field field : fields) {
 				field.setAccessible(true);
-				if(properties.contains(field.getName().toLowerCase()))
+				if(properties.containsKey(field.getName().toLowerCase()))
 					field.set(t, properties.get(field.getName().toLowerCase()));
 			}
 		} catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {

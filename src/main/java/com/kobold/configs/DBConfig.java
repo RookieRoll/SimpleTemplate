@@ -1,6 +1,7 @@
 package com.kobold.configs;
 
 import com.kobold.qkutils.PropertiesUtil;
+import com.mysql.cj.log.Log;
 
 import java.util.Optional;
 
@@ -10,7 +11,8 @@ public class DBConfig {
     private String password;
     private String driverName;
     private String dataBaseName;
-    private Optional<Integer> maxPoolSize;
+    private String maxPoolSize;
+    private String connectionTimeout;
     private static final String propertiesFilePath = "properties/db.properties";
 
     public DBConfig() {}
@@ -61,10 +63,22 @@ public class DBConfig {
     }
 
     public Optional<Integer> getMaxPoolSize() {
-        return maxPoolSize;
+    	if(maxPoolSize.isEmpty())
+    		return Optional.empty();
+        return Optional.of(Integer.parseInt(maxPoolSize));
     }
 
-    public void setMaxPoolSize(Optional<Integer> maxPoolSize) {
+    public void setMaxPoolSize(String maxPoolSize) {
         this.maxPoolSize = maxPoolSize;
+    }
+
+    public Optional<Long> getConnectionTimeout() {
+	    if(connectionTimeout.isEmpty())
+		    return Optional.empty();
+	    return Optional.of(Long.parseLong(connectionTimeout));
+    }
+
+    public void setConnectionTimeout(String connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
     }
 }

@@ -1,4 +1,4 @@
-package com.kobold.configs;
+package com.kobold.context;
 
 import java.sql.Connection;
 

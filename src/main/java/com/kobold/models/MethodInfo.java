@@ -27,6 +27,11 @@ public class MethodInfo {
 	 * 参数列表
 	 * */
 	private Map<Class<?>,String> arguments= new HashMap<>();
+	private String argumentNames;
+	/**
+	 * 方法体
+	 */
+	private String methodBody;
 
 	/**
 	 * 注释
@@ -89,4 +94,26 @@ public class MethodInfo {
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
+
+	public String getMethodBody() {
+		return methodBody;
+	}
+
+	public void setMethodBody(String methodBody) {
+		this.methodBody = methodBody;
+	}
+
+	public String getArgumentNames() {
+		return getArgumentsList();
+	}
+
+	public String handleBaseSetMethodBody(String fieldName){
+		return "this."+fieldName+"="+fieldName+";";
+	}
+
+	public String handleBaseGetMethodBody(String fieldName){
+		return "return this."+fieldName+";";
+	}
+
+
 }
