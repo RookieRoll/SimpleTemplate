@@ -15,11 +15,6 @@ public class DefaultDbApplicationContext extends DbBaseApplicationContext {
 
 	public void setDataSource(DataSource dataSource){
 		this.dataSource=dataSource;
-		try {
-			this.dbConfig.setDataBaseName(dataSource.getConnection().getCatalog());
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override
