@@ -30,7 +30,7 @@ public class DbServiceImpl {
 			IDbFactory context = new DefaultDbApplicationContext();
 			connection = context.getConnection();
 			DatabaseMetaData metaData = connection.getMetaData();
-			tableRs = metaData.getTables(context.getDbName(), null, "%", new String[]{"TABLE"});
+			tableRs = metaData.getTables(context.getDbName(), null, "%", new String[]{DBConst.TABLE});
 			List<ModelInfo> modelInfos = new ArrayList<>();
 			while (tableRs.next()) {
 				String tableName = tableRs.getString(DBConst.TABLE_NAME);
